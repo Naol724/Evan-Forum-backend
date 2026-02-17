@@ -10,6 +10,8 @@ import questionRoutes from "./routes/questionRoute.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import dbconnection from "./DB/dbconfig.js";
 import authMiddleware from "./middleware/authMiddleware.js";
+import { initializeTables } from "./DB/initTables.js";
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,6 +50,10 @@ async function startServer() {
     await dbconnection.query("SELECT NOW()");
 
     console.log("Database connected...");
+
+    // Initialize tables
+    await initializeTables();
+
     app.listen(PORT);
     console.log(`Server running on: http://localhost:${PORT}`);
   } catch (error) {
