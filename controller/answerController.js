@@ -11,7 +11,7 @@ const getAnswers = async (req, res) => {
   const questionIdNum = parseInt(question_id, 10);
   if (isNaN(questionIdNum)) {
     return res.status(StatusCodes.BAD_REQUEST).json({
-      message: "Invalid question_id",
+      message: "Invalid question_idi",
     });
   }
 

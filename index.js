@@ -44,7 +44,9 @@ app.use("/api/answer", authMiddleware, answerRoutes);
 
 async function startServer() {
   try {
-    await dbconnection.execute("SELECT 'test'");
+    // await dbconnection.execute("SELECT 'test'");
+    await dbconnection.query("SELECT NOW()");
+
     console.log("Database connected...");
     app.listen(PORT);
     console.log(`Server running on: http://localhost:${PORT}`);
