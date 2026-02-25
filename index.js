@@ -19,14 +19,30 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // CORS configuration
-app.use(cors());
+const allowedOrigins = process.env.CLIENT_URL 
+  ? process.env.CLIENT_URL.split(',') 
+  : ['http://localhost:5173'];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 
 app.use(express.json());
 
 // Serve static files for uploaded images
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-const PORT = process.env.PORT || 5500;
+const PORT = process.env.PORT || 5000;
 
 app.get("/test", (req, res) => {
   res.send("API is running");
@@ -46,18 +62,20 @@ app.use("/api/answer", authMiddleware, answerRoutes);
 
 async function startServer() {
   try {
-    // await dbconnection.execute("SELECT 'test'");
-    await dbconnection.query("SELECT NOW()");
-
-    console.log("Database connected...");
+    // Test database connection
+    const result = await dbconnection.query("SELECT NOW()");
+    console.log("✅ Database connected successfully");
 
     // Initialize tables
     await initializeTables();
 
     app.listen(PORT);
-    console.log(`Server running on: http://localhost:${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   } catch (error) {
-    console.log("Database connection failed: ", error.message);
+    console.error("❌ Database connection failed:", error.message);
+    console.error("Full error:", error);
+    process.exit(1);
   }
 }
 

@@ -3,13 +3,13 @@ import dbconnection from "./dbconfig.js";
 export async function initializeTables() {
   try {
     // Users table
-    await dbconnection.query(`
+    const usersTable = await dbconnection.query(`
       CREATE TABLE IF NOT EXISTS users (
         userid SERIAL PRIMARY KEY,
         username VARCHAR(20) NOT NULL,
         firstname VARCHAR(20) NOT NULL,
         lastname VARCHAR(20) NOT NULL,
-        email VARCHAR(40) NOT NULL,
+        email VARCHAR(40) NOT NULL UNIQUE,
         password VARCHAR(250) NOT NULL,
         reset_token VARCHAR(255),
         profile_picture VARCHAR(250),
@@ -18,10 +18,10 @@ export async function initializeTables() {
     `);
 
     // Questions table
-    await dbconnection.query(`
+    const questionsTable = await dbconnection.query(`
       CREATE TABLE IF NOT EXISTS questions (
         questionid SERIAL PRIMARY KEY,
-        userid INT NOT NULL REFERENCES users(userid),
+        userid INT NOT NULL REFERENCES users(userid) ON DELETE CASCADE,
         title VARCHAR(50) NOT NULL,
         description VARCHAR(200) NOT NULL,
         tag VARCHAR(20),
@@ -30,7 +30,7 @@ export async function initializeTables() {
     `);
 
     // Answers table
-    await dbconnection.query(`
+    const answersTable = await dbconnection.query(`
       CREATE TABLE IF NOT EXISTS answers (
         answerid SERIAL PRIMARY KEY,
         userid INT NOT NULL REFERENCES users(userid) ON DELETE CASCADE,
@@ -41,7 +41,7 @@ export async function initializeTables() {
     `);
 
     // Chat history table
-    await dbconnection.query(`
+    const chatTable = await dbconnection.query(`
       CREATE TABLE IF NOT EXISTS chat_history (
         chatid SERIAL PRIMARY KEY,
         userid INT NOT NULL REFERENCES users(userid) ON DELETE CASCADE,
@@ -51,8 +51,9 @@ export async function initializeTables() {
       );
     `);
 
-    console.log("Tables created or already exist ✅");
+    console.log("✅ All tables created or already exist");
   } catch (error) {
-    console.error("Error creating tables:", error.message);
+    console.error("❌ Error creating tables:", error.message);
+    throw error;
   }
 }
